@@ -3,66 +3,86 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gmerlene <gmerlene@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gmerlene <gmerlene@student.21-school.ru    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 13:46:32 by gmerlene          #+#    #+#             */
-/*   Updated: 2021/10/09 18:03:32 by gmerlene         ###   ########.fr       */
+/*   Updated: 2021/10/10 10:34:28 by gmerlene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <fcntl.h>
 
-static char	*handle_read_end(char *buff, char *next_line)
+static char	*extract_line(char *line)
 {
-	if (buff[0])
+	int		nl_index;
+	int		len;
+	char	*extracted;
+	int		i;
+
+	nl_index = get_nl_index(line);
+	if (nl_index == -1)
+		len = ft_strlen(line);
+	else
+		len = nl_index + 1;
+	if (len == 0)
+		return (NULL);
+	extracted = malloc(sizeof(char) * (len + 1));
+	if (!extracted)
+		return (NULL);
+	i = 0;
+	while (i < len)
 	{
-		buff[0] = '\0';
-		return (next_line);
+		extracted[i] = line[i];
+		i++;
 	}
-	if (next_line)
-		free(next_line);
-	return (NULL);
+	extracted[i] = '\0';
+	return (extracted);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	buff[BUFFER_SIZE + 1];
+	char		buff[BUFFER_SIZE + 1];
 	int			rt;
-	char		*next_line;
+	static char	*next_line;
+	char		*res;
 
-	next_line = NULL;
-	while (get_nl_index(buff) == -1)
+	if (get_nl_index(next_line) == -1)
 	{
-		next_line = add_to_line(next_line, buff);
-		if (!next_line)
-			return (NULL);
-		rt = read(fd, buff, BUFFER_SIZE);
-		if (rt <= 0)
-			return (handle_read_end(buff, next_line));
-		buff[rt] = '\0';
+		while (get_nl_index(buff) == -1)
+		{
+			rt = read(fd, buff, BUFFER_SIZE);
+			if (rt <= 0)
+			{
+				buff[0] = '\0';
+				break ;
+			}
+			buff[rt] = '\0';
+			next_line = add_to_line(next_line, buff);
+			if (!next_line)
+				return (NULL);
+		}
 	}
-	next_line = add_to_line(next_line, buff);
-	unshift_buff(buff, get_nl_index(buff) + 1);
-	return (next_line);
+	res = extract_line(next_line);
+	if (rt <= 0 && next_line)
+	{
+		free(next_line);
+		next_line = NULL;
+	}
+	unshift_string(next_line, get_nl_index(next_line) + 1);
+	return (res);
 }
 
 /*int	main(void)
 {
 	int	fd;
 
-	//fd = open("to_read.txt", O_RDONLY);
-	fd = 220;
+	fd = open("test.txt", O_RDONLY);
 	printf("%s", get_next_line(fd));
-	// printf("%s", get_next_line(fd));
-	// printf("%s", get_next_line(fd));
-	// printf("%s", get_next_line(fd));
-	
-	int i;
-
-	char a[10] = "abcdefghi";
-	i = 0;
-	while (a[i++])
-		printf("%c\n", a[i - 1]);
-	printf("i: %d\n", i);
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
 	return (0);
 }*/

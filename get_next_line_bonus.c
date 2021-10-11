@@ -1,68 +1,92 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gmerlene <gmerlene@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 13:46:32 by gmerlene          #+#    #+#             */
-/*   Updated: 2021/10/09 17:34:54 by gmerlene         ###   ########.fr       */
+/*   Updated: 2021/10/11 18:22:26 by gmerlene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
-static char	*handle_read_end(char *buff, char *next_line)
+static int	free_buffer(int rb, char *buff)
 {
-	if (buff[0])
+	if (buff)
+		free(buff);
+	return (rb);
+}
+
+static int	read_until_nl(int fd, char **lines)
+{
+	int		rb;
+	char	*buff;
+
+	rb = 0;
+	buff = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buff)
+		return (0);
+	buff[0] = '\0';
+	if (get_nl_index(lines[fd]) == -1)
 	{
-		buff[0] = '\0';
-		return (next_line);
+		while (get_nl_index(buff) == -1)
+		{
+			rb = read(fd, buff, BUFFER_SIZE);
+			if (rb <= 0)
+				return (free_buffer(rb, buff));
+			buff[rb] = '\0';
+			lines[fd] = join_strings(lines[fd], buff);
+			if (!lines[fd])
+				return (free_buffer(rb, buff));
+		}
 	}
-	if (next_line)
-		free(next_line);
-	return (NULL);
+	return (free_buffer(rb, buff));
+}
+
+static char	*extract_line(char *line)
+{
+	int		nl_index;
+	int		len;
+	char	*extracted;
+	int		i;
+
+	if (!line || !ft_strlen(line))
+		return (NULL);
+	nl_index = get_nl_index(line);
+	if (nl_index == -1)
+		len = ft_strlen(line);
+	else
+		len = nl_index + 1;
+	extracted = malloc(sizeof(char) * (len + 1));
+	if (!extracted)
+		return (NULL);
+	i = 0;
+	while (i < len)
+	{
+		extracted[i] = line[i];
+		i++;
+	}
+	extracted[i] = '\0';
+	return (extracted);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	buff[BUFFER_SIZE + 1];
-	int			rt;
-	char		*next_line;
+	static char	*lines[FD_NUM];
+	char		*res;
+	int			rb;
 
-	next_line = NULL;
-	while (get_nl_index(buff) == -1)
+	if (fd < 0 || fd >= FD_NUM || BUFFER_SIZE < 1)
+		return (NULL);
+	rb = read_until_nl(fd, lines);
+	res = extract_line(lines[fd]);
+	if ((get_nl_index(lines[fd]) == -1 && rb <= 0) || (lines[fd] && !res))
 	{
-		next_line = add_to_line(next_line, buff);
-		if (!next_line)
-			return (NULL);
-		rt = read(fd, buff, BUFFER_SIZE);
-		if (rt <= 0)
-			return (handle_read_end(buff, next_line));
-		buff[rt] = '\0';
+		free(lines[fd]);
+		lines[fd] = NULL;
 	}
-	next_line = add_to_line(next_line, buff);
-	unshift_buff(buff, get_nl_index(buff) + 1);
-	return (next_line);
+	unshift_line(lines[fd]);
+	return (res);
 }
-
-/*int	main(void)
-{
-	int	fd;
-
-	//fd = open("to_read.txt", O_RDONLY);
-	fd = 220;
-	printf("%s", get_next_line(fd));
-	// printf("%s", get_next_line(fd));
-	// printf("%s", get_next_line(fd));
-	// printf("%s", get_next_line(fd));
-	
-	int i;
-
-	char a[10] = "abcdefghi";
-	i = 0;
-	while (a[i++])
-		printf("%c\n", a[i - 1]);
-	printf("i: %d\n", i);
-	return (0);
-}*/

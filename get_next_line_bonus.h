@@ -1,17 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gmerlene <gmerlene@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 13:46:29 by gmerlene          #+#    #+#             */
-/*   Updated: 2021/10/09 17:35:01 by gmerlene         ###   ########.fr       */
+/*   Updated: 2021/10/11 18:30:15 by gmerlene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
+
+# define FD_NUM 200000
 
 # include <stdlib.h>
 # include <sys/types.h>
@@ -19,8 +21,9 @@
 # include <unistd.h>
 
 char	*get_next_line(int fd);
-char	*add_to_line(char *str1, char *str2);
+char	*join_strings(char *str1, char *str2);
 int		get_nl_index(char *str);
-void	unshift_buff(char *buff, int start);
+void	unshift_line(char *line);
+int		ft_strlen(char *str);
 
 #endif

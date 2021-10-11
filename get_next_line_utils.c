@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*   get_next_line_utils_bonus.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gmerlene <gmerlene@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 13:46:35 by gmerlene          #+#    #+#             */
-/*   Updated: 2021/10/09 18:03:46 by gmerlene         ###   ########.fr       */
+/*   Updated: 2021/10/11 16:42:17 by gmerlene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
-static int	ft_strlen(char *str)
+int	ft_strlen(char *str)
 {
 	int	i;
 
@@ -24,67 +24,79 @@ static int	ft_strlen(char *str)
 	return (i);
 }
 
-static char	*concat_strings(char *space, char *str1, char *str2)
+static char	*join_strings_in_memory(char *memory, char *str1, char *str2)
 {
 	int		i;
 	int		j;
+	int		len_str1;
+	int		len_str2;
 
 	i = 0;
 	j = 0;
-	while (str1 && str1[i])
+	len_str1 = ft_strlen(str1);
+	len_str2 = ft_strlen(str2);
+	while (i < len_str1)
 	{
-		space[i] = str1[i];
+		memory[i] = str1[i];
 		i++;
 	}
-	while (str2 && str2[j] && str2[j - 1] != '\n')
+	while (j < len_str2)
 	{
-		space[i + j] = str2[j];
+		memory[i + j] = str2[j];
 		j++;
 	}
-	space[i + j] = '\0';
-	return (space);
+	memory[i + j] = '\0';
+	return (memory);
 }
 
-char	*add_to_line(char *str, char *str_buff)
+char	*join_strings(char *str1, char *str2)
 {
-	int		len_str;
-	int		len_buff;
+	int		len_str1;
+	int		len_str2;
 	char	*new_str;
 
-	len_str = ft_strlen(str);
-	len_buff = ft_strlen(str_buff);
-	new_str = malloc(sizeof(char) * (len_str + len_buff + 1));
+	len_str1 = ft_strlen(str1);
+	len_str2 = ft_strlen(str2);
+	new_str = malloc(sizeof(char) * (len_str1 + len_str2 + 1));
 	if (!new_str)
 		return (NULL);
-	new_str = concat_strings(new_str, str, str_buff);
-	if (str)
-		free(str);
+	new_str = join_strings_in_memory(new_str, str1, str2);
+	if (str1)
+		free(str1);
 	return (new_str);
 }
 
-int	get_nl_index(char *buff)
+int	get_nl_index(char *line)
 {
 	int	i;
 
+	if (!line)
+		return (-1);
 	i = 0;
-	while (i < ft_strlen(buff))
+	while (i < ft_strlen(line))
 	{
-		if (buff[i] == '\n')
+		if (line[i] == '\n')
 			return (i);
 		i++;
 	}
 	return (-1);
 }
 
-void	unshift_buff(char *buff, int start)
+void	unshift_line(char *line)
 {
 	int		i;
+	int		nl_index;
 
+	if (!line)
+		return ;
+	nl_index = get_nl_index(line);
+	if (nl_index == -1)
+		return ;
 	i = 0;
-	while (start + i < ft_strlen(buff))
+	while (nl_index + i + 1 < ft_strlen(line))
 	{
-		buff[i] = buff[start + i];
+		line[i] = line[nl_index + i + 1];
 		i++;
 	}
-	buff[i] = '\0';
+	line[i] = '\0';
 }

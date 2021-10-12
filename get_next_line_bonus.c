@@ -6,7 +6,7 @@
 /*   By: gmerlene <gmerlene@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 13:46:32 by gmerlene          #+#    #+#             */
-/*   Updated: 2021/10/11 18:22:26 by gmerlene         ###   ########.fr       */
+/*   Updated: 2021/10/12 10:10:16 by gmerlene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,11 +74,11 @@ static char	*extract_line(char *line)
 
 char	*get_next_line(int fd)
 {
-	static char	*lines[FD_NUM];
+	static char	*lines[OPEN_MAX];
 	char		*res;
 	int			rb;
 
-	if (fd < 0 || fd >= FD_NUM || BUFFER_SIZE < 1)
+	if (fd < 0 || fd >= OPEN_MAX || BUFFER_SIZE < 1)
 		return (NULL);
 	rb = read_until_nl(fd, lines);
 	res = extract_line(lines[fd]);
